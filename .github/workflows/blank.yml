@@ -3,9 +3,9 @@
 name: Magic World High Tech
 
 # Controls when the workflow will run
-on:   
+on:  Triggers
   # Triggers the workflow on push or pull request events but only for the "main" branch
-  push: pushMWHTech
+  push:  ritual
   
 
             
