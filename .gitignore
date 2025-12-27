@@ -1,2 +1,98 @@
 # Google App Engine generated folder
-appengine-generated/
+appengine-generated/import time
+import random
+import json  # <--- NOVA BIBLIOTECA PARA SALVAR DADOS
+import os    # <--- PARA VERIFICAR SE O ARQUIVO EXISTE
+
+# --- (MANTENHA AS CLASSES ORACULO E ARVORE IGUAIS AO ANTERIOR) ---
+# Vou resumir aqui para focar na novidade, mas você usaria o mesmo código base.
+
+class ArvoreHabilidades:
+    def __init__(self):
+        self.caminho_fissao = 0
+        self.caminho_fusao = 0
+        self.caminho_ligacao = 0
+        self.skills_desbloqueadas = []
+
+    # NOVO: Transforma a classe em Dicionário para o JSON entender
+    def para_dicionario(self):
+        return {
+            "fissao": self.caminho_fissao,
+            "fusao": self.caminho_fusao,
+            "ligacao": self.caminho_ligacao,
+            "skills": self.skills_desbloqueadas
+        }
+
+    # NOVO: Reconstrói a classe a partir do dicionário salvo
+    def carregar_dicionario(self, dados):
+        self.caminho_fissao = dados["fissao"]
+        self.caminho_fusao = dados["fusao"]
+        self.caminho_ligacao = dados["ligacao"]
+        self.skills_desbloqueadas = dados["skills"]
+
+class JogadorArcano:
+    def __init__(self):
+        self.z = 1 
+        self.hp = 100
+        self.arvore = ArvoreHabilidades()
+        # Não chamamos atualizar_arcano aqui ainda para evitar erro no load
+
+    def salvar(self):
+        # Cria um pacotão com tudo que importa
+        dados_save = {
+            "z": self.z,
+            "hp": self.hp,
+            "arvore": self.arvore.para_dicionario()
+        }
+        
+        # Abre o arquivo 'savegame.json' no modo de Escrita (Write)
+        with open("savegame.json", "w") as arquivo:
+            json.dump(dados_save, arquivo, indent=4)
+        print("\n💾 JOGO SALVO COM SUCESSO! (savegame.json)")
+
+    def carregar(self):
+        if not os.path.exists("savegame.json"):
+            print("Nenhum save encontrado. Iniciando novo jogo.")
+            return False # Indica que não carregou nada
+        
+        try:
+            # Abre o arquivo no modo de Leitura (Read)
+            with open("savegame.json", "r") as arquivo:
+                dados_save = json.load(arquivo)
+                
+            self.z = dados_save["z"]
+            self.hp = dados_save["hp"]
+            self.arvore.carregar_dicionario(dados_save["arvore"])
+            print(f"\n📂 JOGO CARREGADO! Bem-vindo de volta, Elemento Z={self.z}")
+            return True
+        except:
+            print("Erro ao ler o save. O arquivo pode estar corrompido.")
+            return False
+
+# --- O LOOP PRINCIPAL ATUALIZADO ---
+def menu_principal():
+    player = JogadorArcano()
+    
+    print("\n⚛️  MAGE OF HIGH-TECH MAGIC ⚛️")
+    print("[1] Novo Jogo")
+    print("[2] Carregar Jogo")
+    escolha = input("Opção: ")
+    
+    if escolha == '2':
+        player.carregar()
+    
+    # Inicia o jogo normal
+    # (Aqui viria o loop while do combate que criamos antes)
+    # Mas agora, a cada turno, você pode oferecer a opção de salvar:
+    
+    while player.hp > 0:
+        # ... (Lógica de combate acontece aqui) ...
+        
+        comando = input("\n[ENTER] Continuar | [S] Salvar e Sair: ").lower()
+        if comando == 's':
+            player.salvar()
+            break
+
+# Para testar:
+if __name__ == "__main__":
+    menu_principal()
